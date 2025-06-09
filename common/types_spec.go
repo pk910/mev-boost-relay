@@ -25,6 +25,7 @@ import (
 	"github.com/flashbots/go-boost-utils/utils"
 	"github.com/goccy/go-json"
 	"github.com/holiman/uint256"
+	dynamicssz "github.com/pk910/dynamic-ssz"
 	"github.com/pkg/errors"
 )
 
@@ -481,6 +482,7 @@ type VersionedSignedProposal struct {
 }
 
 func (r *VersionedSignedProposal) MarshalSSZ() ([]byte, error) {
+
 	switch r.Version { //nolint:exhaustive
 	case spec.DataVersionCapella:
 		return r.Capella.MarshalSSZ()
@@ -494,15 +496,17 @@ func (r *VersionedSignedProposal) MarshalSSZ() ([]byte, error) {
 }
 
 func (r *VersionedSignedProposal) UnmarshalSSZ(input []byte) error {
+	dynssz := dynamicssz.NewDynSsz(minimalSpec)
+
 	var err error
 	electraRequest := new(eth2ApiV1Electra.SignedBlockContents)
-	if err = electraRequest.UnmarshalSSZ(input); err == nil {
+	if err = dynssz.UnmarshalSSZ(electraRequest, input); err == nil {
 		r.Version = spec.DataVersionElectra
 		r.Electra = electraRequest
 		return nil
 	}
 	denebRequest := new(eth2ApiV1Deneb.SignedBlockContents)
-	if err = denebRequest.UnmarshalSSZ(input); err == nil {
+	if err = dynssz.UnmarshalSSZ(denebRequest, input); err == nil {
 		r.Version = spec.DataVersionDeneb
 		r.Deneb = denebRequest
 		return nil

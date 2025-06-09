@@ -130,6 +130,7 @@ func TestSSZGetHeaderResponse(t *testing.T) {
 			// ssz -> marshalled json -> matches expected json
 			switch payload.Version { //nolint:exhaustive
 			case spec.DataVersionCapella:
+
 				payload.Capella = new(builderApiCapella.SignedBuilderBid)
 				err = payload.Capella.UnmarshalSSZ(sszExpectedBytes)
 				require.NoError(t, err)
